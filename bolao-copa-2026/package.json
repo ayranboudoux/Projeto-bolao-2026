@@ -1,0 +1,29 @@
+{
+  "name": "bolao-copa-2026",
+  "version": "1.0.0",
+  "description": "Sistema de bolão da Copa do Mundo 2026 com persistência poliglota (PostgreSQL + Redis + MongoDB)",
+  "main": "dist/runner.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/runner.js",
+    "dev": "ts-node src/runner.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev --name init",
+    "prisma:seed": "ts-node prisma/seed.ts",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "setup": "npm install && npm run docker:up && sleep 5 && npm run prisma:migrate && npm run dev"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "ioredis": "^5.4.1",
+    "mongodb": "^6.9.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "prisma": "^5.20.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.4"
+  }
+}

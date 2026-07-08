@@ -1,0 +1,68 @@
+// Schema do banco relacional (PostgreSQL) gerenciado via Prisma ORM
+// Responsável por: usuários, seleções, partidas e palpites oficiais.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id        Int       @id @default(autoincrement())
+  nome      String
+  email     String    @unique
+  criadoEm  DateTime  @default(now())
+
+  palpites  Palpite[]
+
+  @@map("usuarios")
+}
+
+model Selecao {
+  id        Int       @id @default(autoincrement())
+  nome      String    @unique
+  bandeira  String?
+
+  jogosCasa     Partida[] @relation("TimeCasa")
+  jogosVisitante Partida[] @relation("TimeVisitante")
+
+  @@map("selecoes")
+}
+
+model Partida {
+  id              Int       @id @default(autoincrement())
+  timeCasaId      Int
+  timeVisitanteId Int
+  dataHoraInicio  DateTime
+  placarCasa      Int?
+  placarVisitante Int?
+  encerrada       Boolean   @default(false)
+
+  timeCasa        Selecao   @relation("TimeCasa", fields: [timeCasaId], references: [id])
+  timeVisitante   Selecao   @relation("TimeVisitante", fields: [timeVisitanteId], references: [id])
+  palpites        Palpite[]
+
+  @@map("partidas")
+}
+
+model Palpite {
+  id              Int      @id @default(autoincrement())
+  usuarioId       Int
+  partidaId       Int
+  placarCasa      Int
+  placarVisitante Int
+  pontosGanhos    Int      @default(0)
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  usuario         Usuario  @relation(fields: [usuarioId], references: [id])
+  partida         Partida  @relation(fields: [partidaId], references: [id])
+
+  // Regra de negócio: cada usuário só pode ter um único palpite por partida.
+  // Garantido por chave única composta no banco relacional.
+  @@unique([usuarioId, partidaId], name: "usuario_partida_unique")
+  @@map("palpites")
+}
